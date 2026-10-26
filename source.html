@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manuel Process</title>
+<style>
+  :root {
+    --fond: #f5f7fa; --surface: #ffffff; --encre: #0f1b2d; --encre-douce: #5b6b80;
+    --trait: #e3e8ef; --accent: #185fa5; --accent-survol: #0c447c; --accent-fond: #e6f1fb;
+    --ok: #27500a; --ok-fond: #eaf3de; --alerte: #633806; --alerte-fond: #faeeda;
+    --critique: #791f1f; --critique-fond: #fcebeb;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--fond); color: var(--encre);
+    font: 16px/1.6 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; }
+  a { color: var(--accent); }
+  a:hover { color: var(--accent-survol); }
+  .page { display: grid; grid-template-columns: 280px minmax(0, 1fr); max-width: 1280px; margin: 0 auto; }
+  nav.sommaire { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 16px 24px 24px; font-size: 14px; }
+  nav.sommaire h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--encre-douce); margin: 0 0 8px; }
+  nav.sommaire ol { margin: 0; padding-left: 20px; }
+  nav.sommaire li { margin: 2px 0; }
+  nav.sommaire ol ol { padding-left: 16px; font-size: 13px; }
+  nav.sommaire a { text-decoration: none; }
+  main { padding: 24px 32px 64px; min-width: 0; }
+  header.couverture { background: var(--accent); color: #fff; border-radius: 12px; padding: 32px; margin-bottom: 32px; }
+  header.couverture h1 { margin: 0 0 8px; font-size: 32px; line-height: 1.2; }
+  header.couverture p { margin: 4px 0; opacity: .95; }
+  section.chapitre { background: var(--surface); border: 1px solid var(--trait); border-radius: 12px;
+    padding: 24px 28px; margin-bottom: 28px; }
+  h2 { font-size: 24px; margin: 0 0 12px; color: var(--accent-survol); }
+  h3 { font-size: 19px; margin: 28px 0 8px; }
+  h4 { font-size: 16px; margin: 20px 0 6px; }
+  p, li { max-width: 78ch; }
+  figure { margin: 16px 0 24px; }
+  figure img { display: block; max-width: 100%; height: auto; border: 1px solid var(--trait); border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(15, 27, 45, .08); background: var(--surface); }
+  figure.telephone img { max-width: 320px; }
+  figure.longue img { max-height: 1100px; object-fit: cover; object-position: top; }
+  figcaption { font-size: 14px; color: var(--encre-douce); margin-top: 6px; }
+  .bouton { display: inline-block; padding: 0 8px; border: 1px solid var(--accent); border-radius: 6px;
+    color: var(--accent); font-weight: 600; font-size: 14px; line-height: 1.6; white-space: nowrap; }
+  .menu { display: inline-block; padding: 0 8px; background: var(--accent-fond); border-radius: 6px;
+    font-weight: 600; font-size: 14px; }
+  code { background: var(--fond); border: 1px solid var(--trait); border-radius: 4px; padding: 0 4px; font-size: 14px; }
+  .encadre { border-radius: 8px; padding: 12px 16px; margin: 16px 0; border-left: 4px solid; }
+  .encadre p { margin: 4px 0; }
+  .encadre ul { margin: 4px 0; }
+  .info { background: var(--accent-fond); border-color: var(--accent); }
+  .astuce { background: var(--ok-fond); border-color: var(--ok); }
+  .attention { background: var(--alerte-fond); border-color: var(--alerte); }
+  .danger { background: var(--critique-fond); border-color: var(--critique); }
+  .encadre strong.titre { display: block; margin-bottom: 2px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 20px; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--trait); }
+  th { background: var(--fond); font-size: 14px; }
+  .tableau { overflow-x: auto; }
+  ol.etapes { counter-reset: etape; list-style: none; padding-left: 0; }
+  ol.etapes > li { counter-increment: etape; position: relative; padding-left: 44px; margin: 12px 0; }
+  ol.etapes > li::before { content: counter(etape); position: absolute; left: 0; top: 0; width: 30px; height: 30px;
+    border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; text-align: center; line-height: 30px; }
+  .cartes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 16px 0; }
+  .carte { border: 1px solid var(--trait); border-radius: 10px; padding: 12px 14px; background: var(--surface); }
+  .carte h4 { margin: 0 0 4px; }
+  .carte p { margin: 0; font-size: 15px; }
+  .panneau { border: 1px solid var(--trait); border-radius: 12px; padding: 12px; background: var(--fond); }
+  .panneau .carte { margin-bottom: 10px; }
+  .panneau .carte:last-child { margin-bottom: 0; }
+  .num { display: inline-block; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-fond);
+    color: var(--accent); text-align: center; line-height: 26px; font-weight: 700; margin-right: 6px; }
+  .haut { font-size: 14px; display: inline-block; margin-top: 8px; }
+  @media (max-width: 900px) {
+    .page { display: block; }
+    nav.sommaire { position: static; max-height: none; padding: 16px; background: var(--surface);
+      border-bottom: 1px solid var(--trait); }
+    main { padding: 16px; }
+    section.chapitre { padding: 16px; }
+    header.couverture { padding: 20px; }
+    header.couverture h1 { font-size: 26px; }
+    figure.telephone img { max-width: 100%; }
+  }
+  @media print {
+    body { background: #fff; }
+    .page { display: block; }
+    nav.sommaire { position: static; max-height: none; page-break-after: always; }
+    section.chapitre { border: none; page-break-before: always; }
+    figure { page-break-inside: avoid; }
+    .haut { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav class="sommaire" aria-label="Sommaire">
+  <h2>Sommaire</h2>
+  <ol>
+    <li><a href="#bref">Process en bref</a></li>
+    <li><a href="#roles">Les rôles et les espaces</a></li>
+    <li><a href="#connexion">Se connecter</a></li>
+    <li><a href="#mise-en-route">Mise en route : les réglages dans l'ordre</a></li>
+    <li><a href="#admin">Administration</a>
+      <ol>
+        <li><a href="#admin-courriel">E-mails</a></li>
+        <li><a href="#admin-sites">Sites</a></li>
+        <li><a href="#admin-utilisateurs">Utilisateurs</a></li>
+      </ol>
+    </li>
+    <li><a href="#direction">Direction</a> (dont <a href="#lots">suivre un lot</a>)</li>
+    <li><a href="#responsable">Responsable de process</a>
+      <ol>
+        <li><a href="#referentiels">Référentiels</a></li>
+        <li><a href="#indicateurs">Indicateurs</a></li>
+        <li><a href="#standards">Standards</a></li>
+        <li><a href="#process">Process : concevoir</a></li>
+        <li><a href="#executions">Exécutions : lancer et suivre</a></li>
+      </ol>
+    </li>
+    <li><a href="#chef">Chef d'équipe</a></li>
+    <li><a href="#intervenant">Intervenant (téléphone)</a></li>
+    <li><a href="#audit">Audit et support</a></li>
+    <li><a href="#journee">Une journée type</a></li>
+    <li><a href="#serveur">Le PC serveur</a></li>
+    <li><a href="#problemes">Problèmes fréquents</a></li>
+    <li><a href="#bientot">Ce qui arrive bientôt</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="couverture" id="haut">
+  <h1>Process — Manuel d'utilisation</h1>
+  <p>Comment décrire votre travail, le faire faire, et voir les écarts. Sans papier ni classeur Excel.</p>
+  <p>Version du 23 octobre 2026.</p>
+</header>
+
+<div class="encadre info">
+  <strong class="titre">Comment lire ce manuel</strong>
+  <p>Tout le monde lit les chapitres 1 à 3. Ensuite, chacun lit le chapitre de son rôle : Administration (5), Direction (6), Responsable de process (7), Chef d'équipe (8), Intervenant (9).</p>
+  <p>La personne qui installe Process lit aussi le chapitre 4 (les réglages dans l'ordre) et le chapitre 12 (le PC serveur).</p>
+  <p>Les noms en bleu encadré, comme <span class="bouton">Enregistrer</span>, sont les boutons à toucher. Les noms sur fond bleu clair, comme <span class="menu">Utilisateurs</span>, sont les entrées du menu de gauche.</p>
+</div>
+
+<!-- ============================================================ 1 -->
+<section class="chapitre" id="bref">
+  <h2>1. Process en bref</h2>
+  <p>Process remplace les classeurs Excel et les fiches papier qui décrivent et suivent votre travail.</p>
+  <ol class="etapes">
+    <li><strong>On décrit une fois comment le travail se fait</strong> : c'est le <em>process</em>, découpé en <em>étapes</em> (qui fait quoi, en combien de temps, ce qu'on prend, ce qu'on produit, ce qu'on mesure).</li>
+    <li><strong>À chaque fois qu'on fait ce travail, on lance une <em>exécution</em></strong> : par exemple « Mission de la semaine 42 ».</li>
+    <li><strong>Chaque personne reçoit sa tâche</strong> sur son téléphone ou son PC, la commence, saisit ses quantités et ses mesures, puis la termine.</li>
+    <li><strong>Les responsables voient tout de suite les écarts</strong> : retard, quantité manquante, mesure hors des tolérances.</li>
+  </ol>
+
+  <h3>Les mots à connaître</h3>
+  <div class="tableau"><table>
+    <tr><th>Mot</th><th>Ce que c'est</th><th>Exemple</th></tr>
+    <tr><td>Process</td><td>La description d'un travail qui se répète, étape par étape.</td><td>Collecte, Production, Export</td></tr>
+    <tr><td>Étape</td><td>Un morceau du process, fait par un poste.</td><td>Réception, Tri, Traitement</td></tr>
+    <tr><td>Version</td><td>Un process publié est figé. Pour le changer, on crée une nouvelle version.</td><td>Version 1, puis version 2</td></tr>
+    <tr><td>Exécution</td><td>Une fois où l'on fait le process en vrai.</td><td>Lot de production de la semaine 42</td></tr>
+    <tr><td>Tâche</td><td>Une étape d'une exécution, confiée à une personne.</td><td>« Traitement » pour Miora</td></tr>
+    <tr><td>Poste</td><td>Une fonction dans l'entreprise. Une étape se confie à un poste ; une personne occupe un ou plusieurs postes.</td><td>Magasinier, Contrôleur qualité</td></tr>
+    <tr><td>Indicateur</td><td>Une chose qu'on mesure.</td><td>Poids, température, rendement, prix au kg</td></tr>
+    <tr><td>Standard</td><td>La valeur attendue d'un indicateur, avec ses tolérances.</td><td>Rendement attendu 70 %, alerte en dessous de 5 %</td></tr>
+    <tr><td>Écart</td><td>La différence entre ce qui est attendu et ce qui est saisi.</td><td>23 kg manquants à la passation</td></tr>
+    <tr><td>Référentiels</td><td>Les listes de base communes à tous les process.</td><td>Articles, unités, lieux, partenaires</td></tr>
+    <tr><td>Site</td><td>Un endroit de l'entreprise.</td><td>Usine de Mahajanga, Base de collecte Nord</td></tr>
+    <tr><td>Espace</td><td>L'écran de travail propre à chaque rôle.</td><td>Espace Chef d'équipe</td></tr>
+  </table></div>
+
+  <h3>Trois règles de Process</h3>
+  <div class="cartes">
+    <div class="carte"><h4>Rien n'est bloqué</h4><p>Un écart ou un retard déclenche une alerte, jamais un blocage. Seule une personne peut décider d'arrêter.</p></div>
+    <div class="carte"><h4>Rien n'est effacé</h4><p>On archive au lieu de supprimer. Chaque saisie garde sa date, son heure et son auteur.</p></div>
+    <div class="carte"><h4>Chacun son espace</h4><p>Chaque personne ne voit que les écrans de son rôle, et seulement les sites qui la concernent.</p></div>
+  </div>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 2 -->
+<section class="chapitre" id="roles">
+  <h2>2. Les rôles et les espaces</h2>
+  <p>Chaque personne a un ou plusieurs rôles. Le rôle décide de l'espace qu'elle voit en entrant.</p>
+  <div class="tableau"><table>
+    <tr><th>Rôle</th><th>Ce qu'il fait</th><th>Menu de son espace</th></tr>
+    <tr><td><strong>Administration</strong></td><td>Crée les comptes, les sites et règle les e-mails. Ne travaille pas dans les process.</td><td>Tableau de bord, Sites, Utilisateurs, E-mails</td></tr>
+    <tr><td><strong>Direction</strong></td><td>Chapeaute les responsables de process : suit les résultats et valide les standards sensibles.</td><td>Tableau de bord, Validations</td></tr>
+    <tr><td><strong>Responsable de process</strong></td><td>Conçoit et lance les process de ses sites ; chapeaute les chefs d'équipe.</td><td>Exécutions, Référentiels, Indicateurs, Standards, Process</td></tr>
+    <tr><td><strong>Chef d'équipe</strong></td><td>Prend en charge une exécution et répartit les tâches entre les intervenants.</td><td>Tableau de bord, Exécutions, Mes tâches</td></tr>
+    <tr><td><strong>Intervenant</strong></td><td>Réalise les tâches qu'on lui confie : production, qualité, magasin, validation…</td><td>Pas de menu : sa tâche du moment, sur téléphone</td></tr>
+    <tr><td><strong>Audit</strong></td><td>Consulte, sans rien modifier, les process et les traces de ses sites.</td><td>Tableau de bord</td></tr>
+    <tr><td><strong>Support éditeur</strong></td><td>Assistance de l'éditeur, pour quelques jours seulement.</td><td>Tableau de bord</td></tr>
+  </table></div>
+
+  <h3>Qui chapeaute qui</h3>
+  <p><strong>Direction</strong> → <strong>Responsable de process</strong> → <strong>Chef d'équipe</strong> → <strong>Intervenant</strong>.</p>
+  <p>Il n'y a pas de rôle « Qualité » ni « Magasin » : le contrôleur qualité et le magasinier sont des <strong>intervenants</strong>. Ce qui les distingue, c'est leur <strong>poste</strong> (voir <a href="#referentiels">Référentiels</a>).</p>
+
+  <h3>Cumuler plusieurs rôles</h3>
+  <p>Une personne peut avoir plusieurs rôles. Par exemple, Jean Rakoto est chef d'équipe dans un process et intervenant dans un autre. En haut à droite, une liste lui permet de <strong>changer d'espace</strong>.</p>
+  <figure>
+    <img src="captures/chef-mes-taches.png" alt="Espace Chef d'équipe de Jean Rakoto, avec la liste Chef d'équipe en haut à droite pour changer d'espace">
+    <figcaption>En haut à droite : la liste pour changer d'espace (ici « Chef d'équipe »), la clé « Mon compte » et « Se déconnecter ».</figcaption>
+  </figure>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 3 -->
+<section class="chapitre" id="connexion">
+  <h2>3. Se connecter</h2>
+
+  <h3>Ouvrir Process</h3>
+  <p>Dans le navigateur (Chrome, Edge ou Safari), tapez l'adresse donnée par l'administrateur, par exemple <code>https://192.168.88.250</code>. Sur le PC serveur lui-même : <code>https://localhost</code>.</p>
+  <div class="encadre astuce">
+    <strong class="titre">Sur téléphone</strong>
+    <p>Une fois Process ouvert, ajoutez-le à l'écran d'accueil (menu du navigateur, « Ajouter à l'écran d'accueil »). Il s'ouvrira ensuite comme une application.</p>
+  </div>
+
+  <h3>La toute première fois (administrateur seulement)</h3>
+  <p>Au premier démarrage, Process affiche « Bienvenue dans Process » avec l'identifiant <code>admin</code>. L'administrateur choisit son mot de passe (8 caractères au moins), le retape, puis touche <span class="bouton">Enregistrer et entrer</span>.</p>
+  <figure>
+    <img src="../visite/serveur-local/01-premier-demarrage.png" alt="Écran Bienvenue dans Process : identifiant admin, mot de passe à choisir">
+    <figcaption>Le premier démarrage : le mot de passe de l'administrateur se choisit ici, une seule fois.</figcaption>
+  </figure>
+
+  <h3>Les fois suivantes</h3>
+  <p>Tapez votre <strong>identifiant</strong> (par exemple <code>j.rakoto</code>) et votre <strong>mot de passe</strong>, puis touchez <span class="bouton">Se connecter</span>. Vous arrivez directement dans l'espace de votre rôle.</p>
+  <figure>
+    <img src="captures/connexion.png" alt="Écran Connexion : identifiant, mot de passe, bouton Se connecter">
+    <figcaption>L'écran de connexion. L'œil à droite du mot de passe permet de voir ce qu'on tape.</figcaption>
+  </figure>
+
+  <h3>Mon premier accès : l'e-mail de bienvenue</h3>
+  <p>Quand l'administrateur crée votre compte, vous recevez un e-mail avec :</p>
+  <ul>
+    <li>votre <strong>identifiant</strong> ;</li>
+    <li>un <strong>mot de passe provisoire</strong>, qui marche tout de suite ;</li>
+    <li>un <strong>lien</strong> pour choisir votre propre mot de passe (valable 7 jours).</li>
+  </ul>
+  <p>Ouvrez le lien, tapez deux fois le mot de passe de votre choix, puis enregistrez.</p>
+  <figure>
+    <img src="../visite/30-choisir-mot-de-passe.png" alt="Écran pour choisir son mot de passe depuis le lien reçu par e-mail">
+    <figcaption>La page ouverte par le lien de l'e-mail.</figcaption>
+  </figure>
+
+  <h3>Changer mon mot de passe</h3>
+  <p>Touchez la <strong>clé</strong> en haut à droite de n'importe quel écran. Tapez votre mot de passe actuel, puis deux fois le nouveau, et touchez <span class="bouton">Enregistrer</span>.</p>
+  <figure>
+    <img src="captures/mon-compte.png" alt="Écran Changer de mot de passe">
+    <figcaption>« Mon compte » : changer son mot de passe.</figcaption>
+  </figure>
+
+  <h3>Se déconnecter</h3>
+  <p>Touchez <span class="bouton">Se déconnecter</span> en haut à droite. Faites-le toujours sur un téléphone ou un PC partagé.</p>
+  <div class="encadre attention">
+    <strong class="titre">Mot de passe oublié ?</strong>
+    <p>Demandez à l'administrateur : il vous renvoie de nouveaux accès par e-mail ou vous donne un nouveau mot de passe.</p>
+  </div>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 4 -->
+<section class="chapitre" id="mise-en-route">
+  <h2>4. Mise en route : les réglages dans l'ordre</h2>
+  <p>À faire une seule fois, dans cet ordre. Chaque étape a besoin de la précédente.</p>
+  <ol class="etapes">
+    <li><strong>Installer le PC serveur</strong> et démarrer Process. <em>Qui : la personne chargée de l'informatique.</em> Voir <a href="#serveur">chapitre 12</a>.</li>
+    <li><strong>Première connexion</strong> avec l'identifiant <code>admin</code>. <em>Qui : l'administrateur.</em> Voir <a href="#connexion">chapitre 3</a>.</li>
+    <li><strong>Régler l'envoi des e-mails</strong>, puis envoyer un e-mail d'essai. <em>Qui : l'administrateur.</em> Sans ce réglage, les nouveaux comptes ne reçoivent pas leurs accès. Voir <a href="#admin-courriel">E-mails</a>.</li>
+    <li><strong>Créer les sites</strong> (usine, entrepôt, base de collecte…). <em>Qui : l'administrateur.</em> Voir <a href="#admin-sites">Sites</a>.</li>
+    <li><strong>Créer les comptes de la Direction et des Responsables de process</strong> (pour un responsable, cochez ses sites). <em>Qui : l'administrateur.</em> Voir <a href="#admin-utilisateurs">Utilisateurs</a>.</li>
+    <li><strong>Remplir les référentiels</strong> : lieux, postes, unités, devises, catégories, articles, partenaires. Le plus rapide : l'import depuis Excel. <em>Qui : un responsable de process.</em> Voir <a href="#referentiels">Référentiels</a>.</li>
+    <li><strong>Créer les indicateurs</strong> (ce qu'on mesure). <em>Qui : un responsable de process.</em> Voir <a href="#indicateurs">Indicateurs</a>.</li>
+    <li><strong>Fixer les standards</strong> (valeurs attendues et tolérances). Ceux des indicateurs sensibles sont validés par la Direction. <em>Qui : responsable de process, puis Direction.</em> Voir <a href="#standards">Standards</a> et <a href="#direction">Direction</a>.</li>
+    <li><strong>Créer les comptes des chefs d'équipe et des intervenants</strong>, puis cocher leurs <strong>postes</strong> sur leur fiche. <em>Qui : l'administrateur.</em></li>
+    <li><strong>Décrire les process</strong>, les contrôler et les publier. <em>Qui : un responsable de process.</em> Voir <a href="#process">Process</a>.</li>
+    <li><strong>Lancer la première exécution.</strong> <em>Qui : un responsable de process.</em> Voir <a href="#executions">Exécutions</a>.</li>
+  </ol>
+  <div class="encadre info">
+    <strong class="titre">Pourquoi cet ordre ?</strong>
+    <p>Un compte a besoin de ses sites. Une étape a besoin des postes, des articles et des indicateurs. Une tâche ne peut être confiée qu'à une personne qui occupe le bon poste.</p>
+  </div>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 5 -->
+<section class="chapitre" id="admin">
+  <h2>5. Administration</h2>
+  <p>L'administrateur prépare le terrain : e-mails, sites et comptes. Il ne travaille pas dans les process.</p>
+  <figure>
+    <img src="captures/admin-tableau.png" alt="Tableau de bord de l'espace Administration">
+    <figcaption>L'accueil de l'administrateur. Menu de gauche, de haut en bas : Tableau de bord, Sites, Utilisateurs, E-mails.</figcaption>
+  </figure>
+  <p>L'accueil montre trois chiffres : les <strong>comptes actifs</strong>, les <strong>comptes verrouillés</strong> (trop d'erreurs de mot de passe) et l'état du <strong>journal d'audit</strong> (« Intact » ou « Modifié »).</p>
+  <p>La liste <strong>À faire maintenant</strong> rappelle ce qui manque pour démarrer : régler les e-mails, créer le premier site, créer les comptes. Elle signale aussi les comptes verrouillés. Touchez une ligne pour ouvrir la bonne page. Quand tout est prêt, elle affiche « Rien à faire pour l'instant. ».</p>
+
+  <h3 id="admin-courriel">5.1 E-mails : régler l'envoi</h3>
+  <p>Process envoie leurs accès aux nouveaux comptes par e-mail. Il lui faut une adresse d'envoi.</p>
+  <ol class="etapes">
+    <li>Ouvrez <span class="menu">E-mails</span>.</li>
+    <li><strong>Adresse qui envoie</strong> : l'adresse de l'entreprise qui enverra les e-mails, par exemple <code>process@votre-entreprise.mg</code> ou une adresse Gmail.</li>
+    <li><strong>Mot de passe du compte</strong> : le mot de passe de cette adresse. Pour une adresse Gmail, il faut un <strong>mot de passe d'application</strong> (créé dans le compte Google, rubrique Sécurité), pas le mot de passe habituel.</li>
+    <li>Touchez <span class="bouton">Enregistrer</span>, puis <span class="bouton">Envoyer un e-mail d'essai</span> et vérifiez qu'il arrive.</li>
+  </ol>
+  <p>Process devine tout seul le serveur d'envoi d'après l'adresse (Gmail, OVH…). En cas de besoin, les <strong>Réglages avancés</strong> permettent de le corriger.</p>
+  <figure>
+    <img src="../visite/29-reglage-emails.png" alt="Page E-mails : adresse qui envoie, mot de passe du compte">
+    <figcaption>La page E-mails : deux champs suffisent.</figcaption>
+  </figure>
+
+  <h3 id="admin-sites">5.2 Sites</h3>
+  <p>Créez ici les sites de l'entreprise <strong>avant</strong> de créer les comptes : chaque responsable de process ne verra que les process des sites cochés sur son compte.</p>
+  <ol class="etapes">
+    <li>Ouvrez <span class="menu">Sites</span> et touchez <span class="bouton">Nouveau site</span>.</li>
+    <li>Remplissez :
+      <ul>
+        <li><strong>Code</strong> : court et stable, par exemple <code>mahajanga</code>. Il ne change plus ensuite.</li>
+        <li><strong>Nom</strong> : par exemple « Usine de Mahajanga ».</li>
+        <li><strong>Type</strong> : usine, entrepôt, base, bureau…</li>
+        <li><strong>Fuseau horaire</strong> : à Madagascar, <code>Indian/Antananarivo</code>.</li>
+        <li><strong>Adresse</strong> (facultatif).</li>
+      </ul>
+    </li>
+    <li>Enregistrez.</li>
+  </ol>
+  <p>Un site qui ferme s'<strong>archive</strong> : il n'est plus proposé, mais son historique reste lisible. Les boutons <span class="bouton">Exporter en Excel</span> et <span class="bouton">Importer depuis Excel</span> servent pour une longue liste.</p>
+  <figure>
+    <img src="captures/admin-sites.png" alt="Page Sites avec la liste des sites">
+    <figcaption>La page Sites.</figcaption>
+  </figure>
+
+  <h3 id="admin-utilisateurs">5.3 Utilisateurs</h3>
+  <p>La liste de toutes les personnes, avec leurs rôles et leur statut. La case de recherche trouve un nom ou un identifiant.</p>
+  <figure>
+    <img src="captures/admin-utilisateurs.png" alt="Liste des utilisateurs">
+    <figcaption>La page Utilisateurs.</figcaption>
+  </figure>
+
+  <h4>Créer un compte</h4>
+  <ol class="etapes">
+    <li>Touchez <span class="bouton">Nouvel utilisateur</span>. Une fenêtre s'ouvre.</li>
+    <li><strong>Identifiant</strong> : minuscules, chiffres, point ou tiret, par exemple <code>n.ravao</code>.</li>
+    <li><strong>Prénom</strong> et <strong>Nom</strong>.</li>
+    <li><strong>E-mail</strong> : obligatoire. La personne y recevra son identifiant, un mot de passe provisoire et un lien pour choisir le sien.</li>
+    <li><strong>Rôles</strong> : cochez un ou plusieurs rôles.</li>
+    <li><strong>Sites concernés</strong> : pour un Responsable de process ou un Audit, la liste des sites apparaît sous le rôle coché. Cochez ses sites : il ne verra que les process de ces sites. S'il n'existe qu'un site, il est choisi d'office.</li>
+    <li>Pour le <strong>Support éditeur</strong>, un jour de fin d'accès est demandé (7 jours au plus) : l'accès s'arrête seul ce jour-là.</li>
+    <li>Validez. Process affiche les accès créés et envoie l'e-mail.</li>
+  </ol>
+  <figure>
+    <img src="../visite/27-creation-compte.png" alt="Fenêtre Nouvel utilisateur">
+    <figcaption>La fenêtre de création d'un compte.</figcaption>
+  </figure>
+  <figure>
+    <img src="../visite/28-compte-cree.png" alt="Compte créé : identifiant, mot de passe provisoire et lien">
+    <figcaption>Le compte est créé. Si l'e-mail n'est pas parti (envoi pas encore réglé), un message rouge le dit : donnez alors vous-même ces accès à la personne.</figcaption>
+  </figure>
+
+  <h4>La fiche d'une personne</h4>
+  <p>Touchez un nom dans la liste : sa fiche s'ouvre à droite.</p>
+  <div class="tableau"><table>
+    <tr><th>Bouton</th><th>Quand l'utiliser</th></tr>
+    <tr><td><span class="bouton">Suspendre</span></td><td>Absence temporaire (congé, mise à pied). <span class="bouton">Réactiver</span> la rétablit.</td></tr>
+    <tr><td><span class="bouton">Désactiver (départ)</span></td><td>La personne quitte l'entreprise. Son historique reste.</td></tr>
+    <tr><td><span class="bouton">Changer le mot de passe</span></td><td>La personne a oublié son mot de passe : vous en tapez un nouveau et vous le lui donnez.</td></tr>
+    <tr><td><span class="bouton">Envoyer de nouveaux accès par e-mail</span></td><td>La personne n'a pas reçu ou a perdu son e-mail de bienvenue.</td></tr>
+    <tr><td><span class="bouton">Déverrouiller</span></td><td>Le compte s'est verrouillé après trop d'essais de mot de passe.</td></tr>
+    <tr><td><span class="bouton">Fermer ses sessions</span></td><td>Téléphone perdu ou volé : la personne est déconnectée partout.</td></tr>
+  </table></div>
+  <p>Plus bas dans la fiche :</p>
+  <ul>
+    <li><strong>Identité</strong> : prénom, nom, e-mail, puis <span class="bouton">Enregistrer l'identité</span>.</li>
+    <li><strong>Rôles</strong> : cochez ou décochez (et, pour un responsable ou un audit, ses sites), puis <span class="bouton">Enregistrer les rôles</span>.</li>
+    <li><strong>Postes</strong> : cochez les postes de la personne, puis <span class="bouton">Enregistrer les postes</span>. <strong>Important</strong> : une étape ne peut être confiée qu'à une personne qui occupe son poste.</li>
+  </ul>
+  <figure class="longue">
+    <img src="captures/admin-fiche-utilisateur.png" alt="Fiche de Jean Rakoto : actions, identité, rôles, postes">
+    <figcaption>La fiche de Jean Rakoto, chef d'équipe et intervenant.</figcaption>
+  </figure>
+  <div class="encadre attention">
+    <strong class="titre">Déconnecter tout le monde</strong>
+    <p>Le bouton <span class="bouton">Déconnecter tout le monde</span>, en haut de la page, ferme les sessions de toutes les personnes. À garder pour un cas grave (doute sur la sécurité).</p>
+  </div>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 6 -->
+<section class="chapitre" id="direction">
+  <h2>6. Direction</h2>
+  <p>La Direction suit les résultats et valide les standards sensibles (prix, rendements…).</p>
+  <figure>
+    <img src="captures/direction-tableau.png" alt="Tableau de bord de la Direction">
+    <figcaption>L'accueil de la Direction. Menu : Tableau de bord, Validations.</figcaption>
+  </figure>
+  <p>L'accueil montre quatre chiffres, mis à jour chaque minute :</p>
+  <ul>
+    <li><strong>Exécutions en cours</strong> : les process en train de se dérouler ;</li>
+    <li><strong>Tâches en retard</strong> : en orange s'il y en a ;</li>
+    <li><strong>Écarts de quantité</strong> : les étapes où l'on a reçu plus ou moins de 2 % de ce que l'étape précédente a remis ;</li>
+    <li><strong>Standards à valider</strong> : les demandes qui attendent votre décision.</li>
+  </ul>
+  <p>Dessous, <strong>À faire maintenant</strong> donne les standards à valider (touchez la ligne pour ouvrir <span class="menu">Validations</span>), puis chaque retard et chaque écart, avec l'exécution, l'étape et le process concernés.</p>
+  <figure>
+    <img src="../visite/31-direction-tableau.png" alt="Accueil de la Direction avec ses chiffres et ses alertes">
+    <figcaption>Les chiffres et les alertes de la Direction.</figcaption>
+  </figure>
+  <h3>Valider un standard sensible</h3>
+  <p>Quand un responsable de process crée, modifie ou clôture le standard d'un <strong>indicateur sensible</strong>, la demande arrive dans <span class="menu">Validations</span>. Rien ne s'applique avant votre décision.</p>
+  <ol class="etapes">
+    <li>Ouvrez <span class="menu">Validations</span> : chaque ligne montre l'indicateur, le contexte, la demande, la valeur actuelle et la valeur proposée.</li>
+    <li>Touchez le nom de l'indicateur pour voir le détail.</li>
+    <li>Touchez <span class="bouton">Valider</span>, ou <span class="bouton">Rejeter</span> en écrivant le <strong>motif du rejet</strong>.</li>
+  </ol>
+  <div class="encadre info">
+    <p>Vous ne pouvez pas valider ce que vous avez rédigé vous-même : une deuxième personne doit toujours regarder.</p>
+  </div>
+  <figure>
+    <img src="captures/direction-validations.png" alt="Page Validations avec les standards en attente">
+    <figcaption>Les standards en attente de décision.</figcaption>
+  </figure>
+  <h3 id="lots">Suivre un lot</h3>
+  <p>Chaque fois qu'une étape se termine avec une quantité produite, Process crée un <strong>lot</strong> avec un code (par exemple L-000012). Le menu <span class="menu">Lots</span> existe aussi pour le responsable de process, le chef d'équipe et l'audit.</p>
+  <ol class="etapes">
+    <li>Ouvrez <span class="menu">Lots</span> : chaque lot encore en stock, avec ce qui reste, son grade (Q1 le meilleur, Q4 le pire), sa date d'origine et l'étape qui l'a créé.</li>
+    <li>Tapez un code dans la recherche pour retrouver un lot.</li>
+    <li>Touchez un lot : <strong>D'où il vient</strong> remonte toute la chaîne jusqu'à la collecte ; <strong>Où il est allé</strong> montre les étapes qui l'ont pris.</li>
+  </ol>
+  <figure>
+    <img src="../visite/33-lots-stock.png" alt="Liste des lots en stock avec leur reste, leur grade et leur origine">
+    <figcaption>Les lots en stock.</figcaption>
+  </figure>
+  <figure>
+    <img src="../visite/34-lot-fiche.png" alt="Fiche d'un lot : d'où il vient, étape par étape, et où il est allé">
+    <figcaption>La chaîne d'un lot, de la collecte au produit traité.</figcaption>
+  </figure>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="chapitre" id="responsable">
+  <h2>7. Responsable de process</h2>
+  <p>Le responsable de process prépare les listes de base, décrit les process, puis les lance et les suit. Il ne voit que les sites cochés sur son compte.</p>
+  <p>Menu : <span class="menu">Exécutions</span> (l'accueil), <span class="menu">Référentiels</span>, <span class="menu">Indicateurs</span>, <span class="menu">Standards</span>, <span class="menu">Process</span>.</p>
+
+  <h3 id="referentiels">7.1 Référentiels : les listes de base</h3>
+  <p>Les référentiels sont communs à tous les process. Chaque onglet est une liste :</p>
+  <div class="tableau"><table>
+    <tr><th>Onglet</th><th>Ce qu'on y met</th><th>À saisir</th></tr>
+    <tr><td>Sites</td><td>Les sites créés par l'administrateur.</td><td>—</td></tr>
+    <tr><td>Lieux</td><td>Les endroits précis d'un site.</td><td>Code, libellé, type (chambre froide, quai, tunnel, point de collecte…), site, position GPS (obligatoire pour un point de collecte)</td></tr>
+    <tr><td>Postes</td><td>Les fonctions : Collecteur, Contrôleur qualité, Magasinier…</td><td>Code, libellé, sites du poste</td></tr>
+    <tr><td>Unités</td><td>kg, pièce, litre, heure…</td><td>Code, libellé, grandeur (masse, volume…), symbole, décimales</td></tr>
+    <tr><td>Devises</td><td>MGA, EUR, USD…</td><td>Code, libellé, symbole, décimales</td></tr>
+    <tr><td>Catégories</td><td>Les familles d'articles ou de partenaires.</td><td>Code, libellé, s'applique aux articles ou aux partenaires, <strong>attributs</strong> (champs propres à la famille : texte, nombre, liste de choix, oui/non)</td></tr>
+    <tr><td>Articles</td><td>Les produits et matières.</td><td>Code, libellé, nature (matière première, intermédiaire, produit fini, consommable), unité, catégorie, attributs de la catégorie</td></tr>
+    <tr><td>Partenaires</td><td>Fournisseurs, clients, transporteurs, prestataires.</td><td>Code, nom, rôles, téléphone, adresse électronique</td></tr>
+  </table></div>
+  <figure>
+    <img src="captures/responsable-referentiels.png" alt="Écran Référentiels avec ses onglets">
+    <figcaption>L'écran Référentiels et ses onglets.</figcaption>
+  </figure>
+  <figure>
+    <img src="captures/responsable-postes.png" alt="Onglet Postes">
+    <figcaption>L'onglet Postes. Les postes décident à qui une étape peut être confiée.</figcaption>
+  </figure>
+  <figure>
+    <img src="captures/responsable-articles.png" alt="Onglet Articles">
+    <figcaption>L'onglet Articles.</figcaption>
+  </figure>
+
+  <h4>Ajouter, modifier, archiver</h4>
+  <ul>
+    <li><span class="bouton">Nouveau…</span> (par exemple <span class="bouton">Nouvel article</span>) ouvre une fiche vide à droite.</li>
+    <li>Toucher une ligne ouvre sa fiche : modifiez, puis <span class="bouton">Enregistrer</span>.</li>
+    <li>Le <strong>code</strong> ne change plus après la création : choisissez-le court et clair.</li>
+    <li><span class="bouton">Archiver</span> retire un élément des choix proposés, sans perdre son historique. <span class="bouton">Afficher les éléments archivés</span> les montre ; <span class="bouton">Réactiver</span> les remet.</li>
+  </ul>
+
+  <h4>Importer depuis Excel (le plus rapide)</h4>
+  <ol class="etapes">
+    <li>Dans l'onglet voulu, touchez <span class="bouton">Importer depuis Excel</span>, puis <span class="bouton">Télécharger le modèle</span>.</li>
+    <li>Remplissez le modèle dans Excel (une ligne par élément ; la ligne d'exemple est ignorée) et enregistrez-le.</li>
+    <li>Choisissez le fichier. Process montre le résultat <strong>ligne par ligne</strong> avant d'enregistrer quoi que ce soit : à créer, déjà présentes, à corriger.</li>
+    <li>Corrigez dans Excel les lignes signalées si besoin, puis touchez <span class="bouton">Importer N lignes</span>.</li>
+  </ol>
+  <div class="encadre info"><p>L'import ne crée que les éléments nouveaux. Un code qui existe déjà est ignoré : rien n'est modifié ni écrasé.</p></div>
+  <figure>
+    <img src="../visite/26-import-excel.png" alt="Aperçu de l'import Excel avec une ligne à corriger">
+    <figcaption>L'aperçu de l'import : une ligne est à corriger avant d'importer.</figcaption>
+  </figure>
+  <p><span class="bouton">Exporter en Excel</span> donne la liste complète dans un fichier Excel.</p>
+
+  <h3 id="indicateurs">7.2 Indicateurs : ce qu'on mesure</h3>
+  <p>Bibliothèque commune à tous les process : chaque indicateur mesure une grandeur technique, financière ou de temps, saisie ou calculée par une formule.</p>
+  <div class="tableau"><table>
+    <tr><th>Champ</th><th>À saisir</th></tr>
+    <tr><td>Code</td><td>Minuscules, chiffres et souligné, par exemple <code>poids_net</code>. Il ne change plus.</td></tr>
+    <tr><td>Libellé</td><td>Le nom affiché, par exemple « Poids net ».</td></tr>
+    <tr><td>Dimension</td><td>Technique, Financière ou Temps.</td></tr>
+    <tr><td>Type de donnée</td><td>Nombre, nombre entier, oui/non, liste de choix, texte, date et heure, durée, position GPS, photo, signature.</td></tr>
+    <tr><td>Unité ou devise</td><td>kg, °C, MGA…</td></tr>
+    <tr><td>Sens d'amélioration</td><td>Plus c'est haut, mieux c'est ; plus c'est bas, mieux c'est ; ou viser une valeur cible.</td></tr>
+    <tr><td>Formule</td><td>Facultative, pour un indicateur calculé. Les indicateurs s'écrivent <code>@code</code>, par exemple <code>@poids_net / @poids_brut * 100</code>. Process vérifie la formule avant d'enregistrer.</td></tr>
+    <tr><td>Indicateur sensible</td><td>À cocher pour les prix, rendements… : leurs standards seront validés par la Direction. <strong>Une fois enregistré, ce choix ne se retire plus.</strong></td></tr>
+  </table></div>
+  <figure>
+    <img src="captures/responsable-indicateurs.png" alt="Bibliothèque des indicateurs">
+    <figcaption>La bibliothèque des indicateurs.</figcaption>
+  </figure>
+
+  <h3 id="standards">7.3 Standards : les valeurs attendues</h3>
+  <p>Un standard dit quelle valeur on attend pour un indicateur, et à partir de quand on alerte. Il peut dépendre du contexte : site, article, saison… Quand plusieurs standards s'appliquent, <strong>le plus précis l'emporte</strong>.</p>
+  <ol class="etapes">
+    <li>Ouvrez <span class="menu">Standards</span> et choisissez l'<strong>indicateur</strong>.</li>
+    <li>Touchez <span class="bouton">Nouveau standard</span>.</li>
+    <li><strong>Contexte</strong> : général, ou précis (un site, un article, une catégorie…).</li>
+    <li><strong>Valeur attendue</strong>, de deux façons :
+      <ul>
+        <li><strong>Valeur fixe</strong> : par exemple 70 (%) ;</li>
+        <li><strong>Proportionnel à un inducteur</strong> : par exemple 0,02 heure par kg en entrée.</li>
+      </ul>
+    </li>
+    <li><strong>Tolérances</strong>, en % ou en valeur : seuil d'<strong>alerte</strong> et seuil <strong>critique</strong>, au-dessus et en dessous.</li>
+    <li><strong>Valide à partir du</strong> (et, si besoin, <strong>jusqu'au</strong>).</li>
+    <li><strong>Motif</strong> : pourquoi ce standard (3 caractères au moins). Toute modification est motivée et tracée.</li>
+  </ol>
+  <p>Pour un standard existant : touchez-le dans la liste, modifiez la valeur ou les tolérances, ou touchez <span class="bouton">Clôturer</span>. L'<strong>historique</strong> garde toutes les versions.</p>
+  <div class="encadre attention">
+    <p>Pour un <strong>indicateur sensible</strong>, chaque création, modification ou clôture reste « En attente de validation » jusqu'à la décision de la Direction.</p>
+  </div>
+  <figure>
+    <img src="captures/responsable-standards.png" alt="Écran Standards avec un standard ouvert">
+    <figcaption>Un standard en attente de validation, avec sa fiche à droite.</figcaption>
+  </figure>
+
+  <h3 id="process">7.4 Process : décrire le travail</h3>
+  <p>Décrivez vos process : leurs étapes, qui les fait, en combien de temps. Un brouillon incomplet s'enregistre toujours ; seule la publication exige un process complet.</p>
+  <figure>
+    <img src="../visite/09-process-liste.png" alt="Liste des process">
+    <figcaption>La liste des process : version publiée et brouillon de chacun.</figcaption>
+  </figure>
+
+  <h4>Créer un process</h4>
+  <ol class="etapes">
+    <li>Touchez <span class="bouton">Nouveau process</span>.</li>
+    <li><strong>Code</strong> (il ne change plus), <strong>Libellé</strong>, <strong>Description</strong>.</li>
+    <li><strong>Nature</strong> : <em>opérationnel</em> (s'exécute au quotidien) ou <em>de défaillance</em> (se lance quand un écart le demande).</li>
+    <li><strong>Site</strong>, puis <span class="bouton">Créer le process</span>.</li>
+  </ol>
+  <figure>
+    <img src="../visite/10-process-creation.png" alt="Création d'un process">
+    <figcaption>La création d'un process.</figcaption>
+  </figure>
+
+  <h4>Ajouter les étapes : deux vues</h4>
+  <ul>
+    <li><strong>Tableau</strong> : une ligne par étape. <span class="bouton">Ajouter une étape</span> en bas.</li>
+    <li><strong>Diagramme</strong> : le schéma du process. On y dessine : cliquez sur une étape pour la sélectionner, tirez le point sous une étape jusqu'à une autre pour les relier, double-cliquez pour ouvrir sa fiche, touche Suppr pour retirer l'élément sélectionné. <span class="bouton">Imprimer</span> sort le schéma sur papier.</li>
+  </ul>
+  <p>Pensez à <span class="bouton">Enregistrer</span> régulièrement : le brouillon garde votre travail.</p>
+  <figure>
+    <img src="../visite/11-process-tableau.png" alt="Vue Tableau d'un process">
+    <figcaption>La vue Tableau.</figcaption>
+  </figure>
+  <figure>
+    <img src="../visite/24-process-dessin.png" alt="Dessin du process dans la vue Diagramme">
+    <figcaption>La vue Diagramme en mode dessin.</figcaption>
+  </figure>
+
+  <h4>La fiche d'une étape : huit onglets</h4>
+  <div class="tableau"><table>
+    <tr><th>Onglet</th><th>Ce qu'on y règle</th></tr>
+    <tr><td>Général</td><td>Code, libellé, consignes pour la personne qui fait l'étape.</td></tr>
+    <tr><td>Postes</td><td>Le ou les postes qui peuvent faire l'étape.</td></tr>
+    <tr><td>Temps</td><td>La durée prévue.</td></tr>
+    <tr><td>Documents</td><td>Les documents à remplir ou à joindre, ou produits par le système ; une <strong>photo</strong> ou une <strong>signature</strong> peut être demandée.</td></tr>
+    <tr><td>Entrées et sorties</td><td>Ce qu'on prend et ce qu'on produit : produit, perte, rejet, déchet, ressource, avec l'article et l'unité. C'est une déclaration : rien n'est créé dans les stocks.</td></tr>
+    <tr><td>Suite</td><td>Ce qui vient après : une ou plusieurs étapes en parallèle ; une <strong>décision automatique</strong> selon une condition (par exemple <code>@poids &gt; 10</code>, avec une sortie « sinon ») ; une <strong>décision manuelle</strong> Oui/Non posée à la personne. Pour un regroupement : « Attendre toutes les branches » ou « Dès la première branche ».</td></tr>
+    <tr><td>Lieu</td><td>Le lieu de l'étape (facultatif) ; « Position GPS exigée » si la personne doit être sur place.</td></tr>
+    <tr><td>Indicateurs</td><td>Les mesures à saisir : au début, pendant ou à la fin ; « Mesure obligatoire » ou non. Le standard applicable s'affiche.</td></tr>
+  </table></div>
+  <figure>
+    <img src="../visite/12-process-fiche-etape.png" alt="Fiche d'une étape">
+    <figcaption>La fiche d'une étape.</figcaption>
+  </figure>
+  <figure>
+    <img src="../visite/25-etape-indicateurs.png" alt="Onglet Indicateurs d'une étape">
+    <figcaption>L'onglet Indicateurs, avec le standard qui s'applique.</figcaption>
+  </figure>
+  <figure>
+    <img src="../visite/13-process-diagramme.png" alt="Diagramme du process">
+    <figcaption>Le diagramme d'un process complet.</figcaption>
+  </figure>
+
+  <h4>Contrôler et publier</h4>
+  <ol class="etapes">
+    <li>Ouvrez <strong>Contrôle et publication</strong>. Process liste ce qui manque ou paraît bizarre. C'est une aide : les avertissements ne bloquent pas.</li>
+    <li>Touchez <span class="bouton">Publier la version N</span>. La version publiée est <strong>figée</strong> : c'est elle qu'on peut lancer.</li>
+  </ol>
+  <figure>
+    <img src="../visite/14-process-publication.png" alt="Contrôle et publication">
+    <figcaption>Le contrôle avant publication.</figcaption>
+  </figure>
+
+  <h4>Faire évoluer un process : les versions</h4>
+  <ul>
+    <li><span class="bouton">Nouvelle version</span> crée un brouillon à partir de la version publiée. Les exécutions en cours gardent leur version.</li>
+    <li><span class="bouton">Comparer</span> montre ce qui a changé.</li>
+    <li><span class="bouton">Abandonner le brouillon</span> jette les changements non publiés.</li>
+    <li><span class="bouton">Archiver</span> retire un process qui ne sert plus (le motif est demandé).</li>
+  </ul>
+  <figure>
+    <img src="../visite/15-process-versions.png" alt="Versions d'un process">
+    <figcaption>Les versions d'un process.</figcaption>
+  </figure>
+
+  <h3 id="executions">7.5 Exécutions : lancer et suivre</h3>
+  <p>L'accueil du responsable. Lancez un process publié et suivez-le étape par étape.</p>
+  <ol class="etapes">
+    <li>Touchez <span class="bouton">Lancer une exécution</span>.</li>
+    <li><strong>Process à lancer</strong> : choisissez un process publié.</li>
+    <li><strong>Chef d'équipe</strong> : il devra accepter l'exécution avant que la première étape démarre.</li>
+    <li><strong>Nom de l'exécution</strong> : par exemple « Mission de la semaine 42 ».</li>
+    <li>Touchez <span class="bouton">Lancer</span>.</li>
+  </ol>
+  <p>Statuts d'une exécution : <strong>À accepter</strong> (le chef d'équipe n'a pas encore répondu), <strong>En cours</strong>, <strong>Refusée</strong> (avec le motif du chef), <strong>Terminée</strong>.</p>
+  <figure>
+    <img src="../visite/16-responsable-executions.png" alt="Liste des exécutions du responsable">
+    <figcaption>La liste des exécutions.</figcaption>
+  </figure>
+  <p>Touchez une exécution pour voir son schéma (l'étape active est mise en valeur), sa <strong>chronologie</strong> (qui a fait quoi, quand, en combien de temps) et ses retards.</p>
+  <figure>
+    <img src="../visite/17-execution-diagramme.png" alt="Suivi d'une exécution sur le schéma">
+    <figcaption>Le suivi d'une exécution sur le schéma du process.</figcaption>
+  </figure>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 8 -->
+<section class="chapitre" id="chef">
+  <h2>8. Chef d'équipe</h2>
+  <p>Le chef d'équipe accepte les exécutions, répartit les tâches et contrôle le travail fait.</p>
+  <p>Menu : <span class="menu">Tableau de bord</span>, <span class="menu">Exécutions</span>, <span class="menu">Mes tâches</span>.</p>
+
+  <h3>Le tableau de bord</h3>
+  <p>En haut, les chiffres du jour : tâches à faire, en retard, à contrôler. Ensuite, quatre listes :</p>
+  <div class="tableau"><table>
+    <tr><th>Liste</th><th>Ce qu'il faut faire</th></tr>
+    <tr><td>Exécutions à accepter</td><td><span class="bouton">Accepter</span> lance la première étape. <span class="bouton">Refuser</span> demande un motif, que le responsable verra.</td></tr>
+    <tr><td>Tâches à assigner</td><td><span class="bouton">Assigner</span> : choisissez la personne. Process propose d'abord celles qui occupent le poste de l'étape.</td></tr>
+    <tr><td>Tâches en cours</td><td><span class="bouton">Réassigner</span> si la personne est absente ou débordée (le motif est demandé).</td></tr>
+    <tr><td>Tâches à contrôler</td><td><span class="bouton">Contrôler</span> : choisissez <strong>Conforme</strong> ou <strong>Un problème</strong> (décrivez-le), puis <span class="bouton">Enregistrer le contrôle</span>.</td></tr>
+  </table></div>
+  <figure>
+    <img src="../visite/18-chef-tableau-de-bord.png" alt="Tableau de bord du chef d'équipe">
+    <figcaption>Le tableau de bord du chef d'équipe.</figcaption>
+  </figure>
+
+  <h3>Les exécutions de l'équipe</h3>
+  <p>Toutes les exécutions de l'équipe, à suivre sur le schéma du process. En ouvrant une exécution, on voit aussi les <strong>quantités</strong> déclarées, les <strong>écarts</strong> en alerte, le rendement et les photos jointes.</p>
+  <figure>
+    <img src="captures/chef-executions.png" alt="Exécutions du chef d'équipe">
+    <figcaption>La liste des exécutions de l'équipe.</figcaption>
+  </figure>
+  <figure>
+    <img src="../visite/22-execution-ecarts.png" alt="Quantités, écart en alerte et photo d'une exécution">
+    <figcaption>Les quantités d'une exécution : un écart de passation est signalé en alerte, la photo de la fiche est jointe.</figcaption>
+  </figure>
+
+  <h3>Mes tâches</h3>
+  <p>Si le chef d'équipe fait lui-même une étape, sa tâche apparaît dans <span class="menu">Mes tâches</span>, comme pour un intervenant (voir chapitre 9).</p>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="chapitre" id="intervenant">
+  <h2>9. Intervenant (sur téléphone)</h2>
+  <p>L'intervenant n'a pas de menu : il voit sa tâche du moment, une à la fois. Tout se fait du bout du doigt.</p>
+
+  <h3>Faire une tâche</h3>
+  <ol class="etapes">
+    <li>Sous <strong>À faire maintenant</strong>, lisez le nom de l'étape, les <strong>consignes</strong>, la durée prévue, ce qu'il faut <strong>prendre</strong> et <strong>produire</strong>.</li>
+    <li>Touchez <span class="bouton">Commencer</span> au moment où vous commencez vraiment.</li>
+    <li>Saisissez vos <strong>quantités</strong> et vos <strong>mesures</strong>, cochez les documents, prenez la <strong>photo</strong> demandée (image ou PDF, 10 Mo au plus).</li>
+    <li>Si une question est posée (« Que s'est-il passé ? »), choisissez la réponse.</li>
+    <li>Touchez <span class="bouton">Terminé</span>.</li>
+  </ol>
+  <figure class="telephone">
+    <img src="../visite/19-intervenant-tache.png" alt="Tâche du moment sur téléphone">
+    <figcaption>La tâche du moment.</figcaption>
+  </figure>
+  <figure class="telephone">
+    <img src="../visite/21-intervenant-saisie.png" alt="Saisie des quantités et photo sur téléphone">
+    <figcaption>La saisie des quantités : l'écart avec ce qui a été remis s'affiche aussitôt.</figcaption>
+  </figure>
+  <div class="encadre info">
+    <p>Si la quantité reçue diffère de plus de 2 % de ce qui a été remis, Process affiche l'écart et prévient les responsables. Il ne bloque jamais : saisissez la vraie valeur.</p>
+  </div>
+
+  <h3>Prendre un lot dans le stock</h3>
+  <p>Au début d'un process (par exemple la réception à l'usine), la tâche montre <strong>Lots pris dans le stock</strong>. Cochez le lot que vous utilisez : tout ce qui reste est proposé ; tapez moins si vous n'en prenez qu'une partie. La quantité <strong>À prendre</strong> se remplit toute seule. Si une sortie demande un grade, choisissez-le ; sinon le lot créé garde le grade des lots reçus.</p>
+  <figure class="telephone">
+    <img src="../visite/35-terrain-lots-pris.png" alt="Lot du stock coché sur téléphone, quantité prise et quantité à prendre remplies">
+    <figcaption>Le lot coché et la quantité prise.</figcaption>
+  </figure>
+
+  <h3>Transmettre la suite</h3>
+  <p>Quand vous terminez, Process peut demander <strong>« À qui transmettre ? »</strong> : choisissez la personne qui fait l'étape suivante, puis <span class="bouton">Transmettre</span>. Si vous ne savez pas, touchez <span class="bouton">Laisser le chef d'équipe décider</span>.</p>
+  <p>Ensuite s'affiche <strong>« Bien reçu, merci ! »</strong> : touchez <span class="bouton">Continuer</span> pour voir votre tâche suivante. Si vous avez plusieurs tâches, les autres attendent plus bas, sous <strong>Mes autres tâches</strong>.</p>
+  <figure class="telephone">
+    <img src="../visite/20-intervenant-transmettre.png" alt="À qui transmettre ?">
+    <figcaption>Choisir la personne qui reçoit l'étape suivante.</figcaption>
+  </figure>
+
+  <h3>Je ne peux pas faire cette tâche</h3>
+  <p>Matériel en panne, absence de produit, malaise… Touchez <span class="bouton">Je ne peux pas faire cette tâche</span>, écrivez pourquoi, puis <span class="bouton">Envoyer le refus</span>. Le chef d'équipe est prévenu et confie la tâche à quelqu'un d'autre.</p>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 10 -->
+<section class="chapitre" id="audit">
+  <h2>10. Audit et support</h2>
+  <p>L'<strong>auditeur</strong> consulte sans rien modifier les process et les traces de ses sites.</p>
+  <p>Son accueil montre l'état du <strong>journal d'audit</strong> (« Intact » ou « Modifié »), puis les mêmes chiffres que la Direction pour ses sites : exécutions en cours, tâches en retard, écarts de quantité. Si une ligne du journal a été modifiée après coup, une alerte rouge donne son numéro : prévenez la Direction.</p>
+  <figure>
+    <img src="captures/auditeur-tableau.png" alt="Espace Audit">
+    <figcaption>L'espace Audit.</figcaption>
+  </figure>
+  <p>Le <strong>support éditeur</strong> est un accès donné à l'éditeur de Process pour vous aider, 7 jours au plus. Il s'arrête seul à la date choisie par l'administrateur. Son accueil le rappelle simplement : il ne peut ni saisir, ni décider.</p>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 11 -->
+<section class="chapitre" id="journee">
+  <h2>11. Une journée type</h2>
+  <div class="tableau"><table>
+    <tr><th>Quand</th><th>Qui</th><th>Quoi</th></tr>
+    <tr><td>Le matin</td><td>Responsable de process</td><td>Lance l'exécution du jour (<span class="bouton">Lancer une exécution</span>), par exemple « Lot de production de la semaine 42 ».</td></tr>
+    <tr><td>Le matin</td><td>Chef d'équipe</td><td>Accepte l'exécution, puis assigne les premières tâches.</td></tr>
+    <tr><td>Pendant la journée</td><td>Intervenants</td><td>Commencent leur tâche, saisissent quantités et mesures, prennent les photos, terminent et transmettent.</td></tr>
+    <tr><td>Pendant la journée</td><td>Chef d'équipe</td><td>Réassigne si besoin, contrôle les tâches faites (Conforme / Un problème).</td></tr>
+    <tr><td>Pendant la journée</td><td>Responsable de process</td><td>Suit l'avancement, les retards et les écarts sur le schéma.</td></tr>
+    <tr><td>Quand il faut</td><td>Direction</td><td>Valide ou rejette les standards sensibles en attente.</td></tr>
+    <tr><td>Le soir</td><td>Personne chargée du PC serveur</td><td>Touche <span class="bouton">Sauvegarder maintenant</span> et copie la sauvegarde sur une clé USB.</td></tr>
+  </table></div>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 12 -->
+<section class="chapitre" id="serveur">
+  <h2>12. Le PC serveur</h2>
+  <p>Process fonctionne sur un PC de l'entreprise, sans Internet. Les téléphones et les autres PC s'y connectent par le Wi-Fi de l'entreprise.</p>
+
+  <h3>Ce qu'il faut</h3>
+  <ul>
+    <li>Un PC Windows 10 ou 11 avec 8 Go de mémoire au moins, qui reste allumé pendant le travail.</li>
+    <li><strong>Docker Desktop</strong>, gratuit pour les entreprises de moins de 250 salariés et 10 millions de dollars de chiffre d'affaires. Le panneau propose le bouton <span class="bouton">Télécharger Docker Desktop</span>.</li>
+    <li>Un réseau Wi-Fi (ou câble) commun au PC et aux téléphones.</li>
+  </ul>
+
+  <h3>Le panneau « Process — Serveur »</h3>
+  <p>Ouvrez <code>Process-Serveur.exe</code> dans le dossier de Process. Si Windows affiche un écran bleu « Windows a protégé votre ordinateur », touchez <strong>Informations complémentaires</strong> puis <strong>Exécuter quand même</strong>. Le bouton <span class="bouton">Raccourci sur le Bureau</span> le met sur le Bureau.</p>
+  <div class="panneau">
+    <div class="carte"><h4><span class="num">1</span>Démarrer Process</h4><p><span class="bouton">Démarrer</span> : 5 à 15 minutes la première fois, moins d'une minute ensuite. Une seule fois : <span class="bouton">Installer le certificat sur ce PC</span> (répondez « Oui » à Windows). Puis <span class="bouton">Ouvrir Process sur ce PC</span>.</p></div>
+    <div class="carte"><h4><span class="num">2</span>Première connexion de l'administrateur</h4><p>Process s'ouvre sur « Bienvenue dans Process » : l'administrateur choisit son mot de passe (voir <a href="#connexion">chapitre 3</a>).</p></div>
+    <div class="carte"><h4><span class="num">3</span>Téléphones et autres PC</h4><p>L'adresse à taper sur les téléphones, par exemple <code>https://192.168.88.250</code>. <span class="bouton">Copier l'adresse</span> pour l'envoyer aux collègues.</p></div>
+    <div class="carte"><h4><span class="num">4</span>Entretien</h4><p><span class="bouton">Sauvegarder maintenant</span>, <span class="bouton">Mettre à jour</span>, <span class="bouton">Arrêter Process</span>, <span class="bouton">Ouvrir le dossier des sauvegardes</span>.</p></div>
+  </div>
+
+  <h3>Brancher un téléphone</h3>
+  <ol class="etapes">
+    <li>Le téléphone doit être sur le <strong>même Wi-Fi</strong> que le PC serveur : ni les données mobiles, ni un Wi-Fi « invité ».</li>
+    <li>Ouvrez Chrome (Android) ou Safari (iPhone) et tapez l'adresse de l'étape 3 du panneau.</li>
+    <li>Si le navigateur affiche « Votre connexion n'est pas privée » : c'est normal, la sécurité est fabriquée par votre PC serveur. Touchez <strong>Paramètres avancés</strong>, puis <strong>Continuer vers le site</strong>.</li>
+    <li><strong>Recommandé</strong> : installez le certificat une fois par appareil, pour que l'avertissement disparaisse. Ouvrez <code>http://&lt;adresse&gt;/certificat</code> (par exemple <code>http://192.168.88.250/certificat</code>), puis :
+      <ul>
+        <li><strong>Android</strong> : Paramètres › Sécurité › Chiffrement et identifiants › Installer un certificat › Certificat CA ;</li>
+        <li><strong>iPhone</strong> : Réglages › Profil téléchargé › Installer, puis Réglages › Général › Informations › Réglages des certificats : activez Process ;</li>
+        <li><strong>autre PC Windows</strong> : ouvrez le fichier, Installer le certificat, choisissez « Autorités de certification racines de confiance ».</li>
+      </ul>
+    </li>
+    <li>Ajoutez Process à l'écran d'accueil.</li>
+  </ol>
+
+  <h3>Au quotidien</h3>
+  <ul>
+    <li>Laissez le PC allumé et relié au réseau. Désactivez sa mise en veille.</li>
+    <li>Après un redémarrage du PC, ouvrez le panneau et touchez <span class="bouton">Démarrer</span>.</li>
+    <li><strong>Chaque soir</strong> : <span class="bouton">Sauvegarder maintenant</span>. La sauvegarde va dans <code>Documents\Process-sauvegardes</code> ; copiez ce dossier sur une clé USB ou un disque externe, gardé en lieu sûr.</li>
+    <li><span class="bouton">Arrêter Process</span> ne perd aucune donnée.</li>
+    <li>Si les téléphones ne trouvent plus Process, l'adresse du PC a peut-être changé : relisez l'étape 3 du panneau. Pour qu'elle ne change plus, demandez à votre informaticien de « réserver l'adresse » du PC dans la box ou le routeur.</li>
+    <li>Le réseau Windows doit être réglé sur <strong>Privé</strong> (bouton <span class="bouton">Régler le réseau sur « Privé »</span>), et Docker autorisé dans le pare-feu.</li>
+  </ul>
+
+  <h3>Mettre à jour</h3>
+  <p>Quand vous recevez une nouvelle version : mettez son dossier à la place de l'ancien, ouvrez le panneau depuis le nouveau dossier, puis touchez <span class="bouton">Mettre à jour</span>. Une sauvegarde est faite juste avant ; vos données sont gardées.</p>
+
+  <div class="encadre danger">
+    <strong class="titre">Ne jamais faire</strong>
+    <ul>
+      <li>Supprimer les « volumes » dans Docker Desktop : ce sont vos données.</li>
+      <li>Supprimer le dossier <code>%LOCALAPPDATA%\Process</code> : il contient la clé du serveur.</li>
+      <li>Démarrer Process depuis un autre compte Windows.</li>
+    </ul>
+    <p>Le dossier <code>secours</code> contient les outils de réparation, pour l'informaticien.</p>
+  </div>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 13 -->
+<section class="chapitre" id="problemes">
+  <h2>13. Problèmes fréquents</h2>
+  <div class="tableau"><table>
+    <tr><th>Problème</th><th>Solution</th></tr>
+    <tr><td>J'ai oublié mon mot de passe.</td><td>L'administrateur ouvre votre fiche : <span class="bouton">Envoyer de nouveaux accès par e-mail</span>, ou <span class="bouton">Changer le mot de passe</span>.</td></tr>
+    <tr><td>Mon compte est verrouillé.</td><td>Trop d'essais : l'administrateur touche <span class="bouton">Déverrouiller</span> sur votre fiche.</td></tr>
+    <tr><td>Le nouveau collègue n'a pas reçu son e-mail.</td><td>Vérifiez l'adresse sur sa fiche et le réglage <span class="menu">E-mails</span> (<span class="bouton">Envoyer un e-mail d'essai</span>). Regardez aussi ses courriers indésirables. Puis <span class="bouton">Envoyer de nouveaux accès par e-mail</span>.</td></tr>
+    <tr><td>Le lien pour choisir mon mot de passe ne marche plus.</td><td>Il est valable 7 jours. Le mot de passe provisoire reste utilisable ; sinon, demandez de nouveaux accès.</td></tr>
+    <tr><td>Process ne répond pas.</td><td>Vérifiez que le PC serveur est allumé, puis touchez <span class="bouton">Démarrer</span> dans le panneau.</td></tr>
+    <tr><td>Le téléphone ne trouve pas Process.</td><td>Même Wi-Fi que le PC serveur ? Bonne adresse (étape 3 du panneau) ? Commence bien par <code>https://</code> ?</td></tr>
+    <tr><td>« Votre connexion n'est pas privée ».</td><td>Normal : Paramètres avancés › Continuer. Pour ne plus le voir, installez le certificat (chapitre 12).</td></tr>
+    <tr><td>Une personne n'apparaît pas quand j'assigne une tâche.</td><td>Vérifiez que son compte est actif et que le poste de l'étape est coché sur sa fiche (administrateur).</td></tr>
+    <tr><td>Je ne vois pas un process ou un site.</td><td>Le site n'est pas coché sur votre compte : demandez à l'administrateur.</td></tr>
+    <tr><td>Je ne peux pas lancer un process.</td><td>Seules les versions <strong>publiées</strong> se lancent : publiez d'abord le process (7.4).</td></tr>
+    <tr><td>Mon standard ne s'applique pas.</td><td>S'il porte sur un indicateur sensible, il attend la validation de la Direction.</td></tr>
+  </table></div>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+<!-- ============================================================ 14 -->
+<section class="chapitre" id="bientot">
+  <h2>14. Ce qui arrive bientôt</h2>
+  <ul>
+    <li>Pour les lots : la fraîcheur et ses alertes, les décisions (bloquer, déclasser, détruire) et les étiquettes à imprimer.</li>
+    <li>Le travail sans réseau sur téléphone, avec envoi automatique au retour du Wi-Fi.</li>
+  </ul>
+  <a class="haut" href="#haut">↑ Haut de page</a>
+</section>
+
+</main>
+</div>
+</body>
+</html>
